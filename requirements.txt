@@ -1,0 +1,12 @@
+# Packages principaux
+moviepy
+demucs
+torchcodec
+yt-dlp
+spotipy
+
+# PyTorch CPU
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio

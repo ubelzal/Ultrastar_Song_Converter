@@ -1,0 +1,30 @@
+services:
+  karaoke:
+    image: karaoke-app
+    container_name: karaoke-converter
+    volumes:
+      # Monte votre dossier actuel dans /app
+      - .:/app
+      # Dossiers pour les fichiers d'entrée/sortie
+      - ./input:/app/input
+      - ./output:/app/output
+      - ./models:/app/models
+    working_dir: /app
+    environment:
+      # Variables d'environnement utiles
+      - PYTHONUNBUFFERED=1
+      - OUTPUT_DIR=/app/output
+      - INPUT_DIR=/app/input
+      - MODEL_DIR=/app/models
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    # Décommentez si vous avez besoin de GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
