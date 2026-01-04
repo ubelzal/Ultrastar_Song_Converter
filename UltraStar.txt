@@ -1,0 +1,14 @@
+#ID:4E6jr8XjnEE
+#VERSION:1.1.0
+#TITLE:Song Title
+#ARTIST:Artist
+#AUDIO:Artist - Title.mp3
+#BPM:400
+#COVER:Artist - Title [CO].jpg
+#BACKGROUND:Artist - Title [BG].jpg
+#VOCALS:Artist - Title of the song [VOC].mp3
+#INSTRUMENTAL: Artist - Title of the song [INSTR].mp3
+#GENRE:Pop, Rock, Punkfunk
+#TAGS:Love Songs, Movie, 80s
+#LANGUAGE:English, French
+#YEAR:2022
