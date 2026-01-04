@@ -40,11 +40,11 @@ def read_from_db(db_path: str):
 
             safe_name = sanitize_filename(TITLE or f"song_{id}")
 
-            # 1) mp3_data -> Nom.mp3
-            if YoutubeID:
-                print(safe_name)
+            if YoutubeID and ARTIST and safe_name:
+                os.makedirs(os.path.join("output", ARTIST, safe_name), exist_ok=True)
+
        
-            time.sleep(1)
+            #time.sleep(1)
 
         except Exception as e:
                 print(f"❌ Erreur sur {row[1]} (id={row[0]}): {e}\n→ on continue !")
