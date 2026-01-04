@@ -3,7 +3,7 @@ moviepy
 demucs
 torchcodec
 yt-dlp
-spotipy
+spotify
 
 # PyTorch CPU
 --extra-index-url https://download.pytorch.org/whl/cpu

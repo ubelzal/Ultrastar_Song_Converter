@@ -22,7 +22,6 @@ docker compose run --rm karaoke yt-dlp \
   "URL_YOUTUBE" \
   -o "output/%(title)s.%(ext)s"
 
-
 # Lancer un script en arrière-plan (mode détaché)
 docker compose run -d karaoke python long_script.py
 
@@ -33,7 +32,7 @@ docker compose logs -f
 ### COMMANDES DE GESTION ###
 
 # Construire/reconstruire l'image
-docker compose build
+docker build -t karaoke:latest .
 
 # Nettoyer les containers arrêtés
 docker compose down
@@ -53,3 +52,8 @@ UltraStar_Song_Converter/
 ├── models/             # Modèles MFA ou autres
 └── scripts/            # Vos scripts Python
     └── convert.py
+
+#💡 En résumé
+#Dockerfile : comment construire l’image
+#docker-compose.yml : comment lancer le container et le configurer
+#Souvent, tu as les deux ensemble : Dockerfile construit l’image, Compose l’exécute avec tous les réglages.
