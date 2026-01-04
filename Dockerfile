@@ -36,4 +36,7 @@ RUN chown -R 1000:1000 /app
 # Utiliser l'utilisateur existant
 USER 1000
 
-CMD ["/bin/bash"]
+# Télécharger automatiquement les modèles French MFA au lancement et ouvrir un shell
+CMD bash -c "mfa model download acoustic french_mfa && \
+             mfa model download dictionary french_mfa && \
+             exec /bin/bash"
