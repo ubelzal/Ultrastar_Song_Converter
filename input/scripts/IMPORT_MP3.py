@@ -46,14 +46,19 @@ def read_from_db(db_path: str):
                     youtube_url = f"https://www.youtube.com/watch?v={YoutubeID}"
                     output_template = os.path.join(song_dir, f"{safe_title}.%(ext)s")
 
-                    subprocess.run([
-                        "yt-dlp",
-                        "-x",
-                        "--audio-format", "mp3",
-                        "--audio-quality", "0",
-                        youtube_url,
-                        "-o", output_template
-                    ], check=True)
+                    subprocess.run(
+                        [
+                            "yt-dlp",
+                            "-x",
+                            "--audio-format", "mp3",
+                            "--audio-quality", "0",
+                            youtube_url,
+                            "-o", output_template
+                        ],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        check=True
+                    )
                     
 
                 if os.path.exists(mp3_path):
@@ -68,7 +73,7 @@ def read_from_db(db_path: str):
 
             #  
 
-            time.sleep(1.25)
+            time.sleep(0.25)
 
         except Exception as e:
                 print(f"❌ Erreur sur {row[1]} (id={row[0]}): {e}\n→ on continue !")
