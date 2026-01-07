@@ -4,7 +4,10 @@ demucs
 torchcodec
 yt-dlp
 spotify
+spotipy
 tqdm
+requests
+python-dotenv
 
 # PyTorch CPU
 --extra-index-url https://download.pytorch.org/whl/cpu
