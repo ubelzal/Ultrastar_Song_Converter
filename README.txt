@@ -1,11 +1,20 @@
 ### Utilisation ####
 
+  # Construire/reconstruire l'image
+  docker build -t karaoke:latest .
+
+  # Executer la mise a jour de la base de donnée
+  docker compose run --rm karaoke python /app/input/IMPORT_ALL.py
+
+  # Shell interactif
+  docker compose run --rm karaoke /bin/bash
+
+
+### NOTES ###
+
 # Shell interactif
 docker compose run --rm karaoke /bin/bash
 docker compose run --rm karaoke python --version
-
-# Exécuter un script Python
-docker compose run --rm karaoke python votre_script.py
 
 # Utiliser«««««««««««««««««««« MFA pour aligner audio/texte
 docker compose run --rm karaoke mfa align input/audio.wav input/transcript.txt output/
