@@ -49,7 +49,10 @@ def read_from_db(db_path: str):
 
                 mp3_path = os.path.join(song_dir, f"{safe_title}.mp3")
 
+                print(id, " - ", safe_artist, " : ",safe_title)
+
                 if not os.path.exists(mp3_path):
+
                     youtube_url = f"https://www.youtube.com/watch?v={YoutubeID}"
                     output_template = os.path.join(song_dir, f"{safe_title}.%(ext)s")
 
@@ -61,6 +64,7 @@ def read_from_db(db_path: str):
                         youtube_url,
                         "-o", output_template
                     ], check=True)
+                    
 
                 if os.path.exists(mp3_path):
                     relative_mp3_path = os.path.relpath(mp3_path)
@@ -74,7 +78,7 @@ def read_from_db(db_path: str):
 
             #  
 
-            time.sleep(1)
+            time.sleep(0.25)
 
         except Exception as e:
                 print(f"❌ Erreur sur {row[1]} (id={row[0]}): {e}\n→ on continue !")
