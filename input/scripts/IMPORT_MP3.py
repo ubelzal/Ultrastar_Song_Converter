@@ -3,6 +3,8 @@ import re
 import sqlite3
 import subprocess
 import time
+from tqdm import tqdm
+from yt_dlp import YoutubeDL
 
 def sanitize_filename(name: str) -> str:
     """
@@ -39,6 +41,7 @@ def read_from_db(db_path: str):
 
                 mp3_path = os.path.join(song_dir, f"{safe_title}.mp3")
 
+                print()
                 print(id, " - ", safe_artist, " : ",safe_title)
 
                 if not os.path.exists(mp3_path):
@@ -46,19 +49,20 @@ def read_from_db(db_path: str):
                     youtube_url = f"https://www.youtube.com/watch?v={YoutubeID}"
                     output_template = os.path.join(song_dir, f"{safe_title}.%(ext)s")
 
-                    subprocess.run(
-                        [
-                            "yt-dlp",
-                            "-x",
-                            "--audio-format", "mp3",
-                            "--audio-quality", "0",
-                            youtube_url,
-                            "-o", output_template
-                        ],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                        check=True
-                    )
+                    download_audio(youtube_url,output_template)
+                    # subprocess.run(
+                    #     [
+                    #         "yt-dlp",
+                    #         "-x",
+                    #         "--audio-format", "mp3",
+                    #         "--audio-quality", "0",
+                    #         youtube_url,
+                    #         "-o", output_template
+                    #     ],
+                    #     stdout=subprocess.DEVNULL,
+                    #     stderr=subprocess.DEVNULL,
+                    #     check=True
+                    # )
                     
 
                 if os.path.exists(mp3_path):
@@ -81,3 +85,43 @@ def read_from_db(db_path: str):
         
     conn.close()
     print("🎉 Extraction terminée.")
+
+def download_audio(youtube_url, output_template):
+
+    pbar = tqdm(
+        total=100,
+        unit="%",
+        desc="Téléchargement",
+        ncols=80
+    )
+
+    def progress_hook(d):
+        if d['status'] == 'downloading':
+            total = d.get('total_bytes') or d.get('total_bytes_estimate')
+            downloaded = d.get('downloaded_bytes', 0)
+
+            if total:
+                percent = downloaded / total * 100
+                pbar.n = percent
+                pbar.refresh()
+
+        elif d['status'] == 'finished':
+            pbar.n = 100
+            pbar.refresh()
+            pbar.close()
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': output_template,
+        'quiet': True,
+        'no_warnings': True,
+        'progress_hooks': [progress_hook],
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '0',
+        }],
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
