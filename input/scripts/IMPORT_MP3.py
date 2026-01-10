@@ -3,6 +3,7 @@ import re
 import sqlite3
 import subprocess
 import time
+import shutil
 from tqdm import tqdm
 from yt_dlp import YoutubeDL
 
@@ -90,8 +91,16 @@ def download_audio(youtube_url, output_template):
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([youtube_url])
 
-def Reset_Record(id, cursor:object, conn:object ):
-                
+def Reset_Record(id, cursor:object, conn:object, TITLE: str, ARTIST: str ):
+
+    safe_title = sanitize_filename(TITLE)
+    safe_artist = sanitize_filename(ARTIST)
+
+    song_dir = os.path.join("/app/output", safe_artist, safe_title)
+    
+    if os.path.exists(song_dir):
+        shutil.rmtree(song_dir)
+
     cursor.execute("""
         UPDATE song_list
         SET
@@ -103,8 +112,6 @@ def Reset_Record(id, cursor:object, conn:object ):
             INSTRUMENTAL  = '',
             GENRE         = '',
             TAGS          = '',
-            LANGUAGE      = '',
-            YEAR          = '',
             MP3           = '',
             "Update"      = '',
             Re_Import     = 'N'

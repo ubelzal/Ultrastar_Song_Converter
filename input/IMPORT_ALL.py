@@ -40,7 +40,7 @@ def main():
             
             # RE_IMPORT
             if Re_Import and Re_Import.strip() == "Y":
-                IMPORT_MP3.Reset_Record(id,cursor,conn)
+                IMPORT_MP3.Reset_Record(id,cursor,conn,TITLE, ARTIST)
                 print(f"     ✅ Reseter! ") 
 
 
