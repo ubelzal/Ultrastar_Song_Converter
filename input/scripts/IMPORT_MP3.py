@@ -17,7 +17,7 @@ def sanitize_filename(name: str) -> str:
     name = name.replace(" ", "_")
     return name
 
-def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor, conn ):
+def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor: object, conn:object ):
 
     safe_name = sanitize_filename(TITLE or f"song_{id}")
     safe_title = sanitize_filename(TITLE or f"song_{id}")
@@ -49,7 +49,6 @@ def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor, conn ):
   
 
             time.sleep(0.25)
-
 
 def download_audio(youtube_url, output_template):
 
@@ -90,3 +89,27 @@ def download_audio(youtube_url, output_template):
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([youtube_url])
+
+def Reset_Record(id, cursor:object, conn:object ):
+                
+    cursor.execute("""
+        UPDATE song_list
+        SET
+            SpotifyID     = '',
+            BPM           = '',
+            COVER         = '',
+            BACKGROUND    = '',
+            VOCALS        = '',
+            INSTRUMENTAL  = '',
+            GENRE         = '',
+            TAGS          = '',
+            LANGUAGE      = '',
+            YEAR          = '',
+            MP3           = '',
+            "Update"      = '',
+            Re_Import     = 'N'
+        WHERE id = ?
+    """, (id,))
+    
+    conn.commit()
+    time.sleep(0.25)

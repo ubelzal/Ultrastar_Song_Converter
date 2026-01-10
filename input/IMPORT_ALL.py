@@ -27,18 +27,24 @@ def main():
     conn = sqlite3.connect(DATABASE_LOCATION)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update' FROM song_list WHERE id >= 1 ORDER BY id")
+    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import FROM song_list WHERE id >= 1 ORDER BY id")
     rows = cursor.fetchall()
 	
     for row in rows:
 
         try:
-            id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,Update = row
+            id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,Update,Re_Import = row
 
             print()
             print(id, "-", ARTIST, ":",TITLE)
+            
+            # RE_IMPORT
+            if Re_Import and Re_Import.strip() == "Y":
+                IMPORT_MP3.Reset_Record(id,cursor,conn)
+                print(f"     ✅ Reseter! ") 
 
-            #IMPORT MP3
+
+            # IMPORT MP3
             if YoutubeID and ARTIST and TITLE:
                 
                 IMPORT_MP3.load_MP3(id,YoutubeID,TITLE,ARTIST,MP3,cursor,conn)
@@ -47,6 +53,9 @@ def main():
                 print(f"     ✅ MP3 Déjà importé !")  
 
             time.sleep(0.25)
+
+
+
 
         except Exception as e:
                 print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")
