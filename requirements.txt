@@ -3,11 +3,10 @@ moviepy
 demucs
 torchcodec
 yt-dlp
-spotify
-spotipy
 tqdm
 requests
 python-dotenv
+essentia
 
 # PyTorch CPU
 --extra-index-url https://download.pytorch.org/whl/cpu

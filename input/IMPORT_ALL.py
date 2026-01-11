@@ -40,21 +40,24 @@ def main():
             
             # RE_IMPORT
             if Re_Import and Re_Import.strip() == "Y":
-                IMPORT_MP3.Reset_Record(id,cursor,conn,TITLE, ARTIST)
+                IMPORT_MP3.Reset_MP3(id,cursor,conn,TITLE, ARTIST)
                 print(f"     ✅ Reseter! ") 
 
 
             # IMPORT MP3
-            if YoutubeID and ARTIST and TITLE:
-                
+            if (YoutubeID and ARTIST and TITLE) and not MP3:
                 IMPORT_MP3.load_MP3(id,YoutubeID,TITLE,ARTIST,MP3,cursor,conn)
-
+                time.sleep(0.15)
             else:
-                print(f"     ✅ MP3 Déjà importé !")  
-
-            time.sleep(0.25)
+                print(f"     💿 MP3 Déjà importé !")  
 
 
+            # FIND BPM
+            if MP3 and not BPM:
+                IMPORT_MP3.Import_BPM(id,MP3,BPM,cursor,conn)
+                time.sleep(0.15)
+            else:
+                print(f"     🎧 BPM Déjà importé !")  
 
 
         except Exception as e:

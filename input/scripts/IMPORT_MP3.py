@@ -6,6 +6,7 @@ import time
 import shutil
 from tqdm import tqdm
 from yt_dlp import YoutubeDL
+import essentia.standard as es
 
 def sanitize_filename(name: str) -> str:
     """
@@ -91,7 +92,7 @@ def download_audio(youtube_url, output_template):
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([youtube_url])
 
-def Reset_Record(id, cursor:object, conn:object, TITLE: str, ARTIST: str ):
+def Reset_MP3(id, cursor:object, conn:object, TITLE: str, ARTIST: str ):
 
     safe_title = sanitize_filename(TITLE)
     safe_artist = sanitize_filename(ARTIST)
@@ -101,22 +102,37 @@ def Reset_Record(id, cursor:object, conn:object, TITLE: str, ARTIST: str ):
     if os.path.exists(song_dir):
         shutil.rmtree(song_dir)
 
-    cursor.execute("""
-        UPDATE song_list
-        SET
-            SpotifyID     = '',
-            BPM           = '',
-            COVER         = '',
-            BACKGROUND    = '',
-            VOCALS        = '',
-            INSTRUMENTAL  = '',
-            GENRE         = '',
-            TAGS          = '',
-            MP3           = '',
-            "Update"      = '',
-            Re_Import     = 'N'
-        WHERE id = ?
-    """, (id,))
+    # cursor.execute("""
+    #     UPDATE song_list
+    #     SET
+    #         SpotifyID     = '',
+    #         BPM           = '',
+    #         COVER         = '',
+    #         BACKGROUND    = '',
+    #         VOCALS        = '',
+    #         INSTRUMENTAL  = '',
+    #         GENRE         = '',
+    #         TAGS          = '',
+    #         MP3           = '',
+    #         "Update"      = '',
+    #         Re_Import     = 'N'
+    #     WHERE id = ?
+    # """, (id,))
     
-    conn.commit()
+    # conn.commit()
     time.sleep(0.25)
+
+def Import_BPM(id, MP3: str, BPM, cursor:object, conn:object):
+
+    audio = es.MonoLoader(filename=MP3)()
+    rhythm_extractor = es.RhythmExtractor2013(method="multifeature")
+    bpm, beats, beats_confidence, _, _ = rhythm_extractor(audio)
+
+    print(f"     🎧 BPM estimé : {round(bpm)}")
+
+    if not BPM:
+        cursor.execute(
+            "UPDATE song_list SET BPM = ? WHERE id = ?",
+            (round(bpm), id)
+        )
+        conn.commit()
