@@ -54,6 +54,8 @@ def main():
 
             # FIND BPM
             if MP3 and not BPM:
+                #print(f"🔍 Type de id: {type(id)} | Valeur: {id}")  
+                #print(f"🔍 Type de BPM: {type(BPM)} | Valeur: {BPM}")  
                 IMPORT_MP3.Import_BPM(id,MP3,BPM,cursor,conn)
                 time.sleep(0.15)
             else:
