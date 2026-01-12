@@ -1,15 +1,8 @@
-# Packages principaux
-moviepy
 demucs
-torchcodec
-yt-dlp
-tqdm
-requests
-python-dotenv
-essentia
-
-# PyTorch CPU
---extra-index-url https://download.pytorch.org/whl/cpu
 torch
-torchvision
 torchaudio
+torchcodec
+pydub
+yt-dlp
+essentia
+montreal-forced-aligner

@@ -1,6 +1,6 @@
 services:
   karaoke:
-    image: karaoke-app
+    image: karaoke:latest
     container_name: karaoke-converter
     volumes:
       # Monte votre dossier actuel dans /app

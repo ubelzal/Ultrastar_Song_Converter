@@ -1,4 +1,5 @@
 from scripts import IMPORT_MP3
+from scripts import DEMUCS
 import os
 import sqlite3
 import subprocess
@@ -61,6 +62,13 @@ def main():
             else:
                 print(f"     🎧 BPM Déjà importé !")  
 
+
+            # Demucs
+            if not VOCALS:
+                DEMUCS.Separation (id,MP3,cursor,conn)
+                time.sleep(0.15)
+            else:
+                print(f"     🎧 BPM Déjà importé !") 
 
         except Exception as e:
                 print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")
