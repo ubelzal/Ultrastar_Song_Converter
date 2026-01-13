@@ -36,7 +36,7 @@ def main():
         try:
             id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,Update,Re_Import = row
 
-            print()
+            print("")
             print(id, "-", ARTIST, ":",TITLE)
             
             # RE_IMPORT
@@ -64,11 +64,11 @@ def main():
 
 
             # Demucs
-            if not VOCALS:
+            if not VOCALS and not INSTRUMENTAL:
                 DEMUCS.Separation (id,MP3,cursor,conn)
                 time.sleep(0.15)
             else:
-                print(f"     🎧 BPM Déjà importé !") 
+                print(f"     🎤 DEMUCS Déjà importé !") 
 
         except Exception as e:
                 print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")

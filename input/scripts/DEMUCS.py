@@ -1,13 +1,27 @@
 import os
+import sys
 from glob import glob
 from pydub import AudioSegment
+import subprocess
+import shutil
+
+def replace_line(msg):
+    sys.stdout.write("\r\033[K" + msg + "\n")
+    sys.stdout.flush()
 
 def Separation(id, MP3: str, cursor: object, conn: object):
     audio_path = MP3
 
     # 1️⃣ Appel CLI Demucs
-    print("    ℹ️ Lancement de Demucs… cela peut prendre quelques minutes")
-    os.system(f"demucs --two-stems=vocals '{audio_path}'")
+    print("     ℹ️  Lancement de Demucs… cela peut prendre quelques minutes", end="", flush=True)
+    # os.system(f"demucs --two-stems=vocals '{audio_path}' > /dev/null 2>&1")
+    subprocess.run(
+        ["demucs", "--two-stems=vocals", audio_path],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=True
+    )
+    # os.system(f"demucs --two-stems=vocals '{audio_path}'")
 
     # 2️⃣ Récupérer automatiquement le dossier créé par Demucs
     separated_base = "separated/htdemucs/"
@@ -36,4 +50,21 @@ def Separation(id, MP3: str, cursor: object, conn: object):
     AudioSegment.from_wav(vocals_path_wav).export(vocals_mp3, format="mp3")
     AudioSegment.from_wav(instr_path_wav).export(instr_mp3, format="mp3")
 
-    print(f"✅ Extraction terminée : {vocals_mp3} et {instr_mp3}")
+    if os.path.exists(demucs_output_dir):
+        shutil.rmtree(demucs_output_dir)
+
+    if MP3:
+        cursor.execute(
+            "UPDATE song_list SET VOCALS = ? WHERE id = ?",
+            (vocals_mp3, id)
+        )
+        conn.commit()
+
+    if MP3:
+        cursor.execute(
+            "UPDATE song_list SET INSTRUMENTAL = ? WHERE id = ?",
+            (instr_mp3, id)
+        )
+        conn.commit()
+
+    replace_line("     🎤 Extraction Demucs terminée")

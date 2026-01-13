@@ -11,3 +11,6 @@ venv/
 *.md
 .DS_Store
 *.log
+
+# Ignore les fichiers générés par Demucs
+input/separated/
