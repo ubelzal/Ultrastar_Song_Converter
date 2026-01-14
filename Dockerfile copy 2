@@ -1,0 +1,29 @@
+FROM mmcauliffe/montreal-forced-aligner
+
+USER root
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    MFA_ROOT_DIR=/app/models \
+    PATH=/opt/conda/envs/aligner/bin:$PATH
+
+RUN mkdir -p /var/lib/apt/lists/partial && \
+    apt-get update && apt-get install -y \
+    ffmpeg \
+    sox \
+    git \
+    wget \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+RUN mkdir -p /app/models
+
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "aligner", "/bin/bash"]

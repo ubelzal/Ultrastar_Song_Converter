@@ -11,6 +11,12 @@ venv/
 *.md
 .DS_Store
 *.log
+output/
+
+models/pg_mfa_global_socket/
+**/.s.PGSQL.*
+*.sock
+**/*.socket
 
 # Ignore les fichiers générés par Demucs
 input/separated/

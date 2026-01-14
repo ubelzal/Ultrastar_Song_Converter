@@ -5,4 +5,4 @@ torchcodec
 pydub
 yt-dlp
 essentia
-montreal-forced-aligner
+# montreal-forced-aligner

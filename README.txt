@@ -10,6 +10,23 @@
   docker compose run --rm karaoke /bin/bash
 
 
+### MFA ###
+  
+  # Lancer
+  docker compose -f docker-compose-mfa.yml run --rm mfa-init
+  docker compose -f docker-compose-mfa.yml run --rm mfa bash
+
+  # Arrêter
+  docker compose -f docker-compose-mfa.yml down
+
+  # Voir les logs
+  docker compose -f docker-compose-mfa.yml logs
+
+  # Rebuild (si nécessaire)
+  docker compose -f docker-compose-mfa.yml build
+
+
+
 ### NOTES ###
 
 # Shell interactif

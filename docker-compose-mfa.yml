@@ -1,0 +1,41 @@
+services:
+  # Service pour initialiser les modèles
+  mfa-init:
+    image: mmcauliffe/montreal-forced-aligner:latest
+    volumes:
+      - mfa-models:/mfa
+    command: >
+      bash -c "
+      echo '📥 Téléchargement des modèles français...' &&
+      mfa model download acoustic french_mfa || true &&
+      mfa model download dictionary french_mfa || true &&
+      mfa model download acoustic english_us_arpa || true &&
+      mfa model download dictionary english_us_arpa || true &&
+      echo '✅ Modèles installés!'
+      "
+
+  # Service principal MFA
+  mfa:
+    image: mmcauliffe/montreal-forced-aligner:latest
+    container_name: mfa-aligner
+    volumes:
+      - ./input:/data/input
+      - ./output:/data/output
+      - mfa-models:/mfa
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    working_dir: /data
+    depends_on:
+      - mfa-init
+
+volumes:
+  mfa-models:
+
+
+# Lister les modèles acoustiques disponibles
+# mfa model list acoustic
+
+# Lister les dictionnaires disponibles
+# mfa model list dictionary
