@@ -133,7 +133,6 @@ def main():
             # 📝 LYRICS
             if LYRICS:
                 IMPORT_LYRICS.main(id, LYRICS, MP3, cursor, conn)
-                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
 
