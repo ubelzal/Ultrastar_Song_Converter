@@ -3,6 +3,7 @@ from scripts import DEMUCS
 from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
+from input.scripts import EXPORT_ULTRASTAR_FILES
 import os
 import sqlite3
 import subprocess
@@ -10,7 +11,7 @@ import time
 import re
 import unicodedata
 
-DATABASE_LOCATION="/app/input/database/database.db"
+DATABASE_LOCATION="/app/input/dataIMPORT_COVERbase/database.db"
 pwd = os.getcwd()
 
 # Clear terminal (optionnel)
@@ -77,7 +78,7 @@ def main():
     cursor.execute("""
         SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
-               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA
+               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar 
         FROM song_list
         WHERE id >= 1
         ORDER BY id
@@ -90,7 +91,7 @@ def main():
             (
                 id, VERSION, YoutubeID, SpotifyID, ARTIST, TITLE, ALBUM, LYRICS,
                 BPM, COVER, BACKGROUND, VOCALS, INSTRUMENTAL, GENRE, TAGS,
-                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA
+                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA, Export_Ultrastar
             ) = row
 
             print(f"\n{id} - {ARTIST} : {TITLE}")
@@ -153,6 +154,15 @@ def main():
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
                 print("     🎨 COVER déjà importé")
+
+
+            # 🪩 EXPORT ULTRASTAR
+            if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
+                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, cursor, conn)
+                conn.commit()
+                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            else:
+                print("     🪩 Fichiers Ultrastar exportés")
 
 
         except Exception as e:
