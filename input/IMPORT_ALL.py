@@ -3,7 +3,7 @@ from scripts import DEMUCS
 from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
-from input.scripts import EXPORT_ULTRASTAR_FILES
+from scripts import EXPORT_ULTRASTAR_FILES
 import os
 import sqlite3
 import subprocess
@@ -11,7 +11,7 @@ import time
 import re
 import unicodedata
 
-DATABASE_LOCATION="/app/input/dataIMPORT_COVERbase/database.db"
+DATABASE_LOCATION="/app/input/database/database.db"
 pwd = os.getcwd()
 
 # Clear terminal (optionnel)
