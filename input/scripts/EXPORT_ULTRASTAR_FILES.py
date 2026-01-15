@@ -68,7 +68,7 @@ E
     )
     conn.commit()
 
-    print(f"     🎨 Cover téléchargé !")
+    print("     🪩 Fichiers Ultrastar exportés")
 
 
 if __name__ == "__main__":

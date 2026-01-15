@@ -161,8 +161,7 @@ def main():
                 EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
-            else:
-                print("     🪩 Fichiers Ultrastar exportés")
+
 
 
         except Exception as e:
