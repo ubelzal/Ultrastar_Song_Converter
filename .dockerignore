@@ -12,6 +12,7 @@ venv/
 .DS_Store
 *.log
 output/
+UltraStar/
 
 models/pg_mfa_global_socket/
 **/.s.PGSQL.*
