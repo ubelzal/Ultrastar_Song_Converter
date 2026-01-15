@@ -1,6 +1,7 @@
 demucs
 torch
 torchaudio
+requests
 torchcodec
 pydub
 yt-dlp

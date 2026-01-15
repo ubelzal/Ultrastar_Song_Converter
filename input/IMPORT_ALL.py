@@ -2,6 +2,7 @@ from scripts import IMPORT_MP3
 from scripts import DEMUCS
 from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
+from scripts import IMPORT_COVER
 import os
 import sqlite3
 import subprocess
@@ -55,7 +56,7 @@ def sanitize_filename(name: str) -> str:
     """
     # remplacer les caractères invalides par "_"
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
-    # remplacer les espaces par "_"
+    # remplacer les COVERespaces par "_"
     name = name.replace(" ", "_")
     return name
 
@@ -94,9 +95,9 @@ def main():
 
             print(f"\n{id} - {ARTIST} : {TITLE}")
 
-            # 🔄 RE_IMPORT
+            # 🔄 RESET FIELDS
             if Re_Import and Re_Import.strip() == "Y":
-                IMPORT_MP3.Reset_MP3(id, cursor, conn, TITLE, ARTIST)
+                IMPORT_MP3.Reset_Fields(id, TITLE, ARTIST, Re_Import, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
                 print("     ✅ Reset effectué")
@@ -108,16 +109,16 @@ def main():
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
-                print("     💿 MP3 déjà importé")
+                print("     🎵 MP3 déjà importé")
 
 
-            # 🎧 BPM
+            # 💓 BPM
             if MP3 and BPM is None:
                 IMPORT_MP3.Import_BPM(id, MP3, BPM, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
-                print("     🎧 BPM déjà importé")
+                print("     💓 BPM déjà importé")
 
 
             # 🎤 DEMUCS
@@ -132,6 +133,7 @@ def main():
             # 📝 LYRICS
             if LYRICS:
                 IMPORT_LYRICS.main(id, LYRICS, MP3, cursor, conn)
+                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
                 conn.commit()
 
 
@@ -140,6 +142,17 @@ def main():
                 CONVERT_WAV.main(id, WAV, VOCALS, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            else:
+                print("     🔊 WAV déjà importé")
+
+
+            # 🎨 COVER
+            if MP3 and COVER is None:
+                IMPORT_COVER.main(id, MP3, ARTIST, TITLE, cursor, conn)
+                conn.commit()
+                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            else:
+                print("     🎨 COVER déjà importé")
 
 
         except Exception as e:

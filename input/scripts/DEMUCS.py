@@ -44,8 +44,8 @@ def Separation(id, MP3: str, cursor: object, conn: object):
 
     # 4️⃣ Chemins finaux souhaités
     output_dir = os.path.dirname(audio_path)
-    vocals_mp3 = os.path.join(output_dir, f"{base_name}-vocals.mp3")
-    instr_mp3 = os.path.join(output_dir, f"{base_name}-no-vocals.mp3")
+    vocals_mp3 = os.path.join(output_dir, f"{base_name} [VOC].mp3")
+    instr_mp3 = os.path.join(output_dir, f"{base_name} [INSTR].mp3")
 
     # 5️⃣ Conversion WAV -> MP3
     AudioSegment.from_wav(vocals_path_wav).export(vocals_mp3, format="mp3")

@@ -29,13 +29,22 @@ def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor: object, co
     if YoutubeID and safe_artist and safe_title:
         song_dir = os.path.join("/app/output", safe_artist, safe_title)
         os.makedirs(song_dir, exist_ok=True)
-
-        mp3_path = os.path.join(song_dir, f"{safe_title}.mp3")
+        # mp3_path = os.path.join(song_dir, f"{safe_title}.mp3")
+        
+        mp3_path = os.path.join(
+            song_dir,
+            f"{safe_artist} - {safe_title}.mp3"
+        )
 
         if not os.path.exists(mp3_path):
 
             youtube_url = f"https://www.youtube.com/watch?v={YoutubeID}"
-            output_template = os.path.join(song_dir, f"{safe_title}.%(ext)s")
+            # output_template = os.path.join(song_dir, f"{safe_title}.%(ext)s")
+
+            output_template = os.path.join(
+                song_dir,
+                f"{safe_artist} - {safe_title}.%(ext)s"
+            )
 
             download_audio(youtube_url,output_template)                 
 
@@ -92,34 +101,31 @@ def download_audio(youtube_url, output_template):
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([youtube_url])
 
-def Reset_MP3(id, cursor:object, conn:object, TITLE: str, ARTIST: str ):
+def Reset_Fields(id, TITLE: str, ARTIST: str, Re_Import: str, cursor:object, conn:object ):
 
-    safe_title = sanitize_filename(TITLE)
+    safe_title = sanitize_filename(TITLE or f"song_{id}")
     safe_artist = sanitize_filename(ARTIST)
-
     song_dir = os.path.join("/app/output", safe_artist, safe_title)
-    
+
     if os.path.exists(song_dir):
         shutil.rmtree(song_dir)
 
-    # cursor.execute("""
-    #     UPDATE song_list
-    #     SET
-    #         SpotifyID     = '',
-    #         BPM           = '',
-    #         COVER         = '',
-    #         BACKGROUND    = '',
-    #         VOCALS        = '',
-    #         INSTRUMENTAL  = '',
-    #         GENRE         = '',
-    #         TAGS          = '',
-    #         MP3           = '',
-    #         "Update"      = '',
-    #         Re_Import     = 'N'
-    #     WHERE id = ?
-    # """, (id,))
+    cursor.execute("""
+        UPDATE song_list
+        SET
+            COVER        = NULL,
+            BACKGROUND   = NULL,
+            VOCALS       = NULL,
+            INSTRUMENTAL = NULL,
+            MP3          = NULL,
+            WAV          = NULL,
+            MFA          = NULL,
+            "Update"     = NULL,
+            Re_Import    = 'N'
+        WHERE id = ? AND Re_Import = 'Y'
+    """, (id,))
     
-    # conn.commit()
+    conn.commit()
     time.sleep(0.25)
 
 def Import_BPM(id, MP3: str, BPM, cursor:object, conn:object):
