@@ -42,7 +42,7 @@ def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor: object, co
         if os.path.exists(mp3_path):
             relative_mp3_path = os.path.relpath(mp3_path)
 
-            if not MP3:
+            if MP3 is None:
                 cursor.execute(
                     "UPDATE song_list SET MP3 = ? WHERE id = ?",
                     (relative_mp3_path, id)
