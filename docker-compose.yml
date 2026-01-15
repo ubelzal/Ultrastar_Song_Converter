@@ -9,7 +9,7 @@ services:
       - ./input:/app/input
       - ./output:/app/output
       - ./models:/app/models
-    working_dir: /app
+    working_dir: /app/input
     environment:
       # Variables d'environnement utiles
       - PYTHONUNBUFFERED=1
