@@ -49,7 +49,7 @@ def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor: object, co
                 )
                 conn.commit()
   
-
+            print(f"     🎧 MP3 Importé !")
             time.sleep(0.25)
 
 def download_audio(youtube_url, output_template):
