@@ -3,6 +3,16 @@ import unicodedata
 import os
 import subprocess
 
+def get_mfa_models(language: str):
+    language = language.lower()
+
+    if language == "french":
+        return "french_mfa", "french_mfa"
+    elif language == "english":
+        return "english_us_arpa", "english_us_arpa"
+    else:
+        raise ValueError(f"Langue non supportée: {language}")
+
 def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
 
     audio_path = WAV
@@ -16,13 +26,15 @@ def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
     # DOSSIER corpus (wav + txt dedans)
     corpus_dir = os.path.dirname(audio_path)
 
+    dictionary, acoustic_model = get_mfa_models(LANGUAGE)
+
     subprocess.run(
     [
         "mfa",
         "align",
         corpus_dir,          # ✅ dossier, pas fichier
-        "french_mfa",        # dictionnaire
-        "french_mfa",        # modèle acoustique
+        dictionary,          # dictionnaire
+        acoustic_model,      # modèle acoustique
         output_dir,
         "--clean",
         "--overwrite",
