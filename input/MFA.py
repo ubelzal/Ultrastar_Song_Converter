@@ -1,3 +1,4 @@
+from scripts import MFA_CONVERT
 import os
 import sqlite3
 import subprocess
@@ -60,7 +61,7 @@ def main():
     conn = sqlite3.connect(DATABASE_LOCATION)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA FROM song_list WHERE id = 1 ORDER BY id")
+    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA FROM song_list WHERE id >= 1 ORDER BY id")
     rows = cursor.fetchall()
 	
     for row in rows:
@@ -71,14 +72,15 @@ def main():
             print("")
             print(id, "-", ARTIST, ":",TITLE)
 
-            # # MFA_CONVERT
-            # if MFA is None and WAV:
-            #     MFA_CONVERT.main (id,WAV,MFA,cursor,conn)
-            #     time.sleep(0.15)
+            # MFA_CONVERT
+            if MFA is None and WAV and LANGUAGE:
+                MFA_CONVERT.main (id,WAV,MFA,LANGUAGE,cursor,conn)
+                time.sleep(0.15)
 
         except Exception as e:
-                print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")
-                continue
+
+            print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")
+            continue
         
     conn.close()
     print()

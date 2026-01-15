@@ -2,7 +2,6 @@ from scripts import IMPORT_MP3
 from scripts import DEMUCS
 from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
-from scripts import MFA_CONVERT
 import os
 import sqlite3
 import subprocess
@@ -65,7 +64,7 @@ def main():
     conn = sqlite3.connect(DATABASE_LOCATION)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA FROM song_list WHERE id = 1 ORDER BY id")
+    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA FROM song_list WHERE id >= 1 ORDER BY id")
     rows = cursor.fetchall()
 	
     for row in rows:
@@ -101,7 +100,7 @@ def main():
 
 
             # Demucs
-            if not VOCALS and not INSTRUMENTAL:
+            if VOCALS is None and INSTRUMENTAL is None:
                 DEMUCS.Separation (id,MP3,cursor,conn)
                 time.sleep(0.15)
             else:
@@ -119,11 +118,6 @@ def main():
                 CONVERT_WAV.main (id,WAV,VOCALS,cursor,conn)
                 time.sleep(0.15)
 
-
-            # # MFA_CONVERT
-            # if MFA is None and WAV:
-            #     MFA_CONVERT.main (id,WAV,MFA,cursor,conn)
-            #     time.sleep(0.15)
 
         except Exception as e:
                 print(f"     ❌ Erreur d'importation sur {row[1]} (id={row[0]}): {e}\n→!")
