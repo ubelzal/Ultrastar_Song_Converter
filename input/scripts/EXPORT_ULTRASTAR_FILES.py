@@ -31,7 +31,7 @@ def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCA
     source_dir = os.path.dirname(MP3)
 
     # Copier tous les .mp3 et .pg
-    for ext in ("*.mp3", "*.pg"):
+    for ext in ("*.mp3", "*.jpg"):
         for file in glob.glob(os.path.join(source_dir, ext)):
             shutil.copy2(file, target_dir)
 
