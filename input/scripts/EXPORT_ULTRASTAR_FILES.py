@@ -37,7 +37,7 @@ def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCA
 
     # Créer le fichier .txt
     txt_filename = f"{safe_artist} - {safe_title}.txt"
-    txt_path = os.path.join(target_dir, sanitize_filename(txt_filename))
+    txt_path = os.path.join(target_dir, (txt_filename))
 
     txt_content = f"""#ID:{id}
 #TITLE:{TITLE}

@@ -15,15 +15,16 @@ os.system("clear" if os.name == "posix" else "cls")
 def clean_lyrics_text(text: str) -> str:
     cleaned_lines = []
 
-    for line in text.splitlines():VOCALS
+    for line in text.splitlines():
 
         # 🔥 Supprimer toute ligne contenant [
-    if "[" in line: 
+        if "[" in line:
+            continue
 
         # Normalisation unicode
         line = unicodedata.normalize("NFKC", line)
 
-        # Minusculesfrom scripts import CONVERT_WAV
+        # Minuscules
         line = line.lower()
 
         # Remplacer apostrophes par espace

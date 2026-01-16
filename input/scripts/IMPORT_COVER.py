@@ -4,16 +4,30 @@ import os
 import subprocess
 import requests
 
+def sanitize_filename(name: str) -> str:
+    """
+    Nettoie le nom pour être sûr qu'il puisse être utilisé comme nom de fichier.
+    Conserve les lettres accentuées et remplace les espaces par "_".
+    """
+    # remplacer les caractères invalides par "_"
+    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+    # remplacer les espaces par "_"
+    name = name.replace(" ", "_")
+    return name
+
+
 def main(id, MP3: str, ARTIST: str, TITLE: str, cursor: object, conn: object):
 
     audio_path = MP3
+    safe_title = sanitize_filename(TITLE or f"song_{id}")
+    safe_artist = sanitize_filename(ARTIST)
 
     base_name = os.path.splitext(os.path.basename(audio_path))[0]
     output_dir = os.path.dirname(audio_path)
    
     cover_file = os.path.join(
             output_dir,
-            f"{ARTIST} - {TITLE} [CO].jpg"
+            f"{safe_artist} - {safe_title} [CO].jpg"
         )
 
     download_itunes_cover(

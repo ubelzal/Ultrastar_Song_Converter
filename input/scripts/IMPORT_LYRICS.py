@@ -45,7 +45,7 @@ def main(id, LYRICS: str, MP3: str, cursor: object, conn: object):
 
     base_name = os.path.splitext(os.path.basename(audio_path))[0]
     output_dir = os.path.dirname(audio_path)
-    lyrics_file = os.path.join(output_dir, f"{base_name}-vocals.txt")
+    lyrics_file = os.path.join(output_dir, f"{base_name}.txt")
 
     #print(lyrics_file)
     cleaned_lyrics = clean_lyrics_text(LYRICS)
