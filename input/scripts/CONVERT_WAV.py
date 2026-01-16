@@ -11,6 +11,8 @@ def main(id, WAV: str, VOCALS: str, cursor: object, conn: object):
     output_dir = os.path.dirname(audio_path)
     wav_file = os.path.join(output_dir, f"{base_name}.wav")
 
+    wav_file = re.sub(r"\s*\[VOC\]", "", wav_file)
+
     subprocess.run(
     [
         "ffmpeg",
@@ -25,12 +27,11 @@ def main(id, WAV: str, VOCALS: str, cursor: object, conn: object):
     check=True
     )
 
-    if not WAV:
-        cursor.execute(
-            "UPDATE song_list SET WAV = ? WHERE id = ?",
-            (wav_file, id)
-        )
-        conn.commit()
+    cursor.execute(
+        "UPDATE song_list SET WAV = ? WHERE id = ?",
+        (wav_file, id)
+    )
+    conn.commit()
 
     print(f"     📝 Fichier .wav créer !")
 
