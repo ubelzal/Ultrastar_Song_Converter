@@ -39,8 +39,6 @@ def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
 
     # DOSSIER corpus (wav + txt dedans)
     corpus_dir = os.path.dirname(audio_path)
-    print("corpus_dir: " + corpus_dir)
-    exit()
 
     dictionary, acoustic_model = get_mfa_models(LANGUAGE)
 
