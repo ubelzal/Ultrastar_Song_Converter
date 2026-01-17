@@ -7,6 +7,8 @@ import shutil
 from tqdm import tqdm
 from yt_dlp import YoutubeDL
 import essentia.standard as es
+import pwd
+import grp
 
 def sanitize_filename(name: str) -> str:
     """
@@ -31,6 +33,13 @@ def load_MP3(id,YoutubeID: str, TITLE: str, ARTIST: str, MP3, cursor: object, co
         os.makedirs(song_dir, exist_ok=True)
         # mp3_path = os.path.join(song_dir, f"{safe_title}.mp3")
         
+        # Récupérer UID et GID de ubelzal
+        uid = pwd.getpwnam("ubelzal").pw_uid
+        gid = grp.getgrnam("ubelzal").gr_gid
+
+        # Changer le propriétaire
+        os.chown(song_dir, uid, gid)
+
         mp3_path = os.path.join(
             song_dir,
             f"{safe_artist} - {safe_title}.mp3"
