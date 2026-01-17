@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# 🛑 Arrêter tous les conteneurs actifs
+# docker stop $(docker ps -q)
+
+# 🔥 Forcer l’arrêt (si un conteneur est bloqué)
+docker kill $(docker ps -q)
+
 # docker compose run --rm karaoke python bash
 docker compose -p karaoke run --rm karaoke python IMPORT_ALL.py
 
