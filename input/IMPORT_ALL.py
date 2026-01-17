@@ -4,6 +4,7 @@ from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
 from scripts import EXPORT_ULTRASTAR_FILES
+from scripts import IMPORT_GAP
 import os
 import sqlite3
 import subprocess
@@ -78,7 +79,7 @@ def main():
     cursor.execute("""
         SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
-               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar 
+               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar, GAP  
         FROM song_list
         WHERE id >= 1
         ORDER BY id
@@ -91,7 +92,7 @@ def main():
             (
                 id, VERSION, YoutubeID, SpotifyID, ARTIST, TITLE, ALBUM, LYRICS,
                 BPM, COVER, BACKGROUND, VOCALS, INSTRUMENTAL, GENRE, TAGS,
-                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA, Export_Ultrastar
+                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA, Export_Ultrastar, GAP 
             ) = row
 
             print(f"\n{id} - {ARTIST} : {TITLE}")
@@ -156,12 +157,20 @@ def main():
                 print("     🎨 COVER déjà importé")
 
 
-            # 🪩 EXPORT ULTRASTAR
-            if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
-                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, cursor, conn)
+            # 🪩 IMPORT GAP
+            if WAV and GAP is None:
+                IMPORT_GAP.main(id, WAV, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            else:
+                print("     ∅ GAP déjà importé")
 
+
+            # 🪩 EXPORT ULTRASTAR
+            if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
+                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, cursor, conn)
+                conn.commit()
+                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
 
 
         except Exception as e:

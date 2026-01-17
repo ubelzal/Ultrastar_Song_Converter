@@ -15,7 +15,7 @@ def sanitize_filename(name: str) -> str:
     return name
 
 
-def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCALS: str, INSTRUMENTAL: str, cursor: object, conn: object):
+def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCALS: str, INSTRUMENTAL: str, GAP: int, cursor: object, conn: object):
 
     safe_title = sanitize_filename(TITLE)
     safe_artist = sanitize_filename(ARTIST)
@@ -50,6 +50,7 @@ def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCA
 #COVER:{safe_artist} - {safe_title} [CO].jpg
 #BACKGROUND:{safe_artist} - {safe_title} [BG].jpg
 #BPM:{BPM}
+#GAP:{GAP}
 #BEAT:0
 #GAP:0
 #OFFSET:-200
