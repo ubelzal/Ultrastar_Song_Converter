@@ -62,20 +62,20 @@ def main():
     conn = sqlite3.connect(DATABASE_LOCATION)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA FROM song_list WHERE id >= 1 ORDER BY id")
+    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA, Speaker FROM song_list WHERE id >= 170 ORDER BY id")
     rows = cursor.fetchall()
 	
     for row in rows:
 
         try:
-            id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,Update,Re_Import, WAV,MFA = row
+            id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,Update,Re_Import, WAV,MFA, Speaker = row
 
             print("")
             print(id, "-", ARTIST, ":",TITLE)
 
             # MFA_CONVERT
             if MFA is None and WAV and LANGUAGE:
-                MFA_CONVERT.main (id,WAV,MFA,LANGUAGE,cursor,conn)
+                MFA_CONVERT.main (id,WAV,MFA,LANGUAGE,Speaker,cursor,conn)
                 time.sleep(0.15)
 
         except Exception as e:

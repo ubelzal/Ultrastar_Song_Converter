@@ -79,9 +79,9 @@ def main():
     cursor.execute("""
         SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
-               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar, GAP  
+               LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar,GAP,Speaker   
         FROM song_list
-        WHERE id >= 1
+        WHERE id = 206
         ORDER BY id
     """)
     
@@ -92,7 +92,7 @@ def main():
             (
                 id, VERSION, YoutubeID, SpotifyID, ARTIST, TITLE, ALBUM, LYRICS,
                 BPM, COVER, BACKGROUND, VOCALS, INSTRUMENTAL, GENRE, TAGS,
-                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA, Export_Ultrastar, GAP 
+                LANGUAGE, YEAR, MP3, Update, Re_Import, WAV, MFA, Export_Ultrastar,GAP,Speaker  
             ) = row
 
             print(f"\n{id} - {ARTIST} : {TITLE}")
@@ -168,7 +168,7 @@ def main():
 
             # 🪩 EXPORT ULTRASTAR
             if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
-                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA,  cursor, conn)
+                EXPORT_ULTRASTAR_FILES.textgrid_to_ultrastar(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA,  cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
 

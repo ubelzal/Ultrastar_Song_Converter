@@ -1,4 +1,4 @@
-from textgrid import TextGrid
+from praatio import textgrid
 import os
 import re
 import shutil
@@ -8,14 +8,14 @@ def sanitize_filename(name: str) -> str:
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
     return name.strip().replace(" ", "_")
 
-def textgrid_to_ultrastar(id, textgrid_path, output_path, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA, cursor, conn):
+def textgrid_to_ultrastar(id, output_path, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA, cursor, conn):
     """
     Convertit un Long TextGrid MFA en fichier Ultrastar prêt à chanter.
     Chaque mot devient une note (-) avec début et fin en centièmes de seconde.
     """
 
     tg = TextGrid()
-    tg.read(textgrid_path)
+    tg.read(MFA)
 
     safe_artist = sanitize_filename(ARTIST)
     safe_title = sanitize_filename(TITLE)
@@ -40,8 +40,8 @@ def textgrid_to_ultrastar(id, textgrid_path, output_path, ARTIST, TITLE, YEAR, M
 
     # Ultrastar attend généralement un fichier txt avec info de la chanson
     lines = []
-    lines.append(f"#TITLE: {title}")
-    lines.append(f"#ARTIST: {artist}")
+    lines.append(f"#TITLE: {safe_title}")
+    lines.append(f"#ARTIST: {safe_artist}")
     lines.append(f"#LANGUAGE: {LANGUAGE}")
     lines.append(f"#YEAR: {YEAR}")
     lines.append(f"#MP3: {safe_artist} - {safe_title}.mp3")

@@ -24,7 +24,7 @@ def sanitize_filename(name: str) -> str:
     name = name.replace(" ", "_")
     return name
 
-def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
+def main(id, WAV: str, MFA: str, LANGUAGE: str,speaker: int, cursor: object, conn: object):
 
     audio_path = WAV
     base_name = os.path.splitext(os.path.basename(audio_path))[0]
@@ -42,26 +42,33 @@ def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
 
     dictionary, acoustic_model = get_mfa_models(LANGUAGE)
 
-    subprocess.run(
-    [
+    speakers = 1  # ou 2, 3, etc.
+
+    mfa_cmd = [
         "mfa",
         "align",
-        corpus_dir,          # ✅ dossier, pas fichier
-        dictionary,          # dictionnaire
-        acoustic_model,      # modèle acoustique
+        corpus_dir,
+        dictionary,
+        acoustic_model,
         output_dir,
         "--clean",
         "--overwrite",
         "--beam", "100",
         "--retry_beam", "400",
         "--output_format", "long_textgrid",
-        "--include_original_text", # ligne par ligne
-        "--single_speaker",         # important pour un seul chanteur
-        "--conservative_alignment"  # pour éviter timings trop courts
-    ],
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL,
-    check=True
+        "--include_original_text",
+        "--conservative_alignment"
+    ]
+
+    # Ajout conditionnel
+    if speakers == 1:
+        mfa_cmd.append("--single_speaker")
+
+    subprocess.run(
+        mfa_cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=True
     )
 
     if not MFA:
