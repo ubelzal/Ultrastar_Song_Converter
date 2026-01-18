@@ -157,13 +157,13 @@ def main():
                 print("     🎨 COVER déjà importé")
 
 
-            # 🪩 IMPORT GAP
-            if WAV and GAP is None:
-                IMPORT_GAP.main(id, WAV, cursor, conn)
-                conn.commit()
-                MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
-            else:
-                print("     ∅  GAP déjà importé")
+            # # 🪩 IMPORT GAP
+            # if WAV and GAP is None:
+            #     IMPORT_GAP.main(id, WAV, cursor, conn)
+            #     conn.commit()
+            #     MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            # else:
+            #     print("     ∅  GAP déjà importé")
 
 
             # 🎶 EXPORT ULTRASTAR

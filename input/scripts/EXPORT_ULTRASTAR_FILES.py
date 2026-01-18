@@ -159,7 +159,7 @@ def main(id, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LA
         'background': '',
         'cover': f"{safe_artist} - {safe_title} [CO].jpg",
         'mp3': f"{safe_artist} - {safe_title}.mp3",
-        'gap': 0
+        'gap': GAP
     }
     
     # Conversion
