@@ -121,8 +121,8 @@ class TextGridToUltraStar:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(lines))
         
-        print(f"Fichier UltraStar créé: {output_path}")
-        print(f"Nombre de notes: {len(words)}")
+        #print(f"Fichier UltraStar créé: {output_path}")
+        #print(f"Nombre de notes: {len(words)}")
 
 def sanitize_filename(name: str) -> str:
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
@@ -165,17 +165,25 @@ def main(id, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LA
     # Conversion
     converter = TextGridToUltraStar(bpm=bpm)
     
-    print(f"Lecture du fichier TextGrid: {textgrid_file}")
+    # print(f"Lecture du fichier TextGrid: {textgrid_file}")
     words = converter.parse_textgrid(textgrid_file)
-    print(f"Mots extraits: {len(words)}")
+    # print(f"Mots extraits: {len(words)}")
     
-    print(f"\nCréation du fichier UltraStar...")
+    # print(f"\nCréation du fichier UltraStar...")
     converter.create_ultrastar_file(words, output_file, metadata)
     
-    print("\n✓ Conversion terminée!")
-    print(f"\nPour améliorer les hauteurs de notes, vous pouvez:")
-    print("1. Utiliser une analyse de fréquence audio (librosa, aubio)")
-    print("2. Ajuster manuellement les valeurs de pitch dans le fichier généré")
+    cursor.execute(
+        "UPDATE song_list SET Export_Ultrastar='N' WHERE id=?",
+        (id,)
+    )
+    conn.commit()
+
+    print("     🎶 Export UltraStar terminé (version officielle)")
+
+    # print("\n✓ Conversion terminée!")
+    # print(f"\nPour améliorer les hauteurs de notes, vous pouvez:")
+    # print("1. Utiliser une analyse de fréquence audio (librosa, aubio)")
+    # print("2. Ajuster manuellement les valeurs de pitch dans le fichier généré")
 
 if __name__ == "__main__":
     main()

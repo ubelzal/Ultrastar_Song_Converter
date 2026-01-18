@@ -81,7 +81,7 @@ def main():
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
                LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar,GAP,Speaker   
         FROM song_list
-        WHERE id = 206
+        WHERE id >= 1 
         ORDER BY id
     """)
     
@@ -115,7 +115,7 @@ def main():
 
 
             # 💓 BPM
-            if MP3: # and BPM is None:
+            if MP3 and BPM is None:
                 IMPORT_MP3.Import_BPM(id, MP3, BPM, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
