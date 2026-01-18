@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Supprimer les paquets installés automatiquement mais plus utilisés
+sudo apt autoremove -y && sudo apt autoclean -y
+
 # 🛑 Arrêter tous les conteneurs actifs
 docker stop $(docker ps -q)
 

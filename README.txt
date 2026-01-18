@@ -42,11 +42,6 @@ docker compose run --rm karaoke python -m demucs input/chanson.mp3
 # Télécharger une vidéo YouTube
 docker compose run --rm karaoke yt-dlp "URL_YOUTUBE" -o "input/%(title)s.%(ext)s"
 
-# Télécharger le MP3 YouTube
-docker compose run --rm karaoke yt-dlp \
-  -x --audio-format mp3 --audio-quality 0 \
-  "URL_YOUTUBE" \
-  -o "output/%(title)s.%(ext)s"
 
 # Lancer un script en arrière-plan (mode détaché)
 docker compose run -d karaoke python long_script.py

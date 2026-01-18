@@ -143,12 +143,11 @@ def Import_BPM(id, MP3: str, BPM, cursor:object, conn:object):
     rhythm_extractor = es.RhythmExtractor2013(method="multifeature")
     bpm, beats, beats_confidence, _, _ = rhythm_extractor(audio)
 
-    print(f"     🎧 BPM estimé : {round(bpm)}")
+    print(f"     🎧 BPM estimé : {round(bpm *2)}")
 
-    if not BPM:
-        cursor.execute(
-            "UPDATE song_list SET BPM = ? WHERE id = ?",
-            (round(bpm), id)
-        )
-        conn.commit()
+    cursor.execute(
+        "UPDATE song_list SET BPM = ? WHERE id = ?",
+        (round(bpm*2), id)
+    )
+    conn.commit()
 

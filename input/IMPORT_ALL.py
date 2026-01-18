@@ -115,7 +115,7 @@ def main():
 
 
             # 💓 BPM
-            if MP3 and BPM is None:
+            if MP3: # and BPM is None:
                 IMPORT_MP3.Import_BPM(id, MP3, BPM, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
@@ -163,12 +163,12 @@ def main():
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
-                print("     ∅ GAP déjà importé")
+                print("     ∅  GAP déjà importé")
 
 
             # 🪩 EXPORT ULTRASTAR
             if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
-                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, cursor, conn)
+                EXPORT_ULTRASTAR_FILES.main(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA,  cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
 

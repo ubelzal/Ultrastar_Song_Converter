@@ -1,76 +1,79 @@
+from textgrid import TextGrid
 import os
+import re
 import shutil
 import glob
-import re
 
 def sanitize_filename(name: str) -> str:
-    """
-    Nettoie le nom pour être sûr qu'il puisse être utilisé comme nom de fichier.
-    Conserve les lettres accentuées et remplace les espaces par "_".
-    """
-    # remplacer les caractères invalides par "_"
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
-    # remplacer les espaces par "_"
-    name = name.replace(" ", "_")
-    return name
+    return name.strip().replace(" ", "_")
 
+def textgrid_to_ultrastar(id, textgrid_path, output_path, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA, cursor, conn):
+    """
+    Convertit un Long TextGrid MFA en fichier Ultrastar prêt à chanter.
+    Chaque mot devient une note (-) avec début et fin en centièmes de seconde.
+    """
 
-def main(id, YEAR, MP3: str, COVER: str, ARTIST: str, TITLE: str, BPM: str, VOCALS: str, INSTRUMENTAL: str, GAP: int, cursor: object, conn: object):
+    tg = TextGrid()
+    tg.read(textgrid_path)
 
-    safe_title = sanitize_filename(TITLE)
     safe_artist = sanitize_filename(ARTIST)
+    safe_title = sanitize_filename(TITLE)
 
-    UltraStar_base = "/app/UltraStar"
+    base = "/app/UltraStar"
+    target = os.path.join(base, safe_artist, safe_title)
+    os.makedirs(target, exist_ok=True)
 
-    target_dir = os.path.join(UltraStar_base, safe_artist, safe_title)
-   
-    # Créer le dossier si nécessaire
-    os.makedirs(target_dir, exist_ok=True)
-
-    # Dossier source du MP3
-    source_dir = os.path.dirname(MP3)
-
-    # Copier tous les .mp3 et .pg
+    # Copier médias
     for ext in ("*.mp3", "*.jpg"):
-        for file in glob.glob(os.path.join(source_dir, ext)):
-            shutil.copy2(file, target_dir)
+        for f in glob.glob(os.path.join(os.path.dirname(MP3), ext)):
+            shutil.copy2(f, target)
 
-    # Créer le fichier .txt
-    txt_filename = f"{safe_artist} - {safe_title}.txt"
-    txt_path = os.path.join(target_dir, (txt_filename))
+    out = os.path.join(
+        target,
+        f"{safe_artist} - {safe_title}.txt"
+    )
 
-    txt_content = f"""#ID:{id}
-#TITLE:{TITLE}
-#ARTIST:{ARTIST}
-#LANGUAGE:French
-#EDITION:
-#GENRE:
-#YEAR:{YEAR}
-#MP3:{safe_artist} - {safe_title}.mp3
-#COVER:{safe_artist} - {safe_title} [CO].jpg
-#BACKGROUND:{safe_artist} - {safe_title} [BG].jpg
-#BPM:{BPM}
-#GAP:{GAP}
-#BEAT:0
-#GAP:0
-#OFFSET:-200
-F 0 0 0 
-- 1
-F 1 0 0 
-E
-"""
+    # Exemple d'utilisation
+    #textgrid_file = "output/song_Long.TextGrid"  # le TextGrid MFA
+    #ultrastar_file = "output/song.txt"
+
+    # Ultrastar attend généralement un fichier txt avec info de la chanson
+    lines = []
+    lines.append(f"#TITLE: {title}")
+    lines.append(f"#ARTIST: {artist}")
+    lines.append(f"#LANGUAGE: {LANGUAGE}")
+    lines.append(f"#YEAR: {YEAR}")
+    lines.append(f"#MP3: {safe_artist} - {safe_title}.mp3")
+    lines.append(f"#COVER: {safe_artist} - {safe_title} [CO].jpg")  
+    lines.append(f"#BACKGROUND: {safe_artist} - {safe_title} [BG].jpg")  
+    lines.append(f"#EDITION: ")   
+    lines.append(f"#GENRE: ") 
+    lines.append("")
+
+    # Supposons que le premier intervalle soit la couche des mots
+    # MFA Long TextGrid a souvent une seule tier "words" ou "phone" par mot
+    if len(tg.tiers) == 0:
+        raise ValueError("TextGrid vide ou format incorrect")
     
-    with open(txt_path, "w", encoding="utf-8") as f:
-        f.write(txt_content)
+    tier = tg.tiers[0]  # prend le premier tier
+    for interval in tier.intervals:
+        word = interval.mark.strip()
+        if word == "":
+            continue  # ignore les silences
+        start_cs = int(interval.minTime * 100)  # Ultrastar utilise centièmes de seconde
+        end_cs = int(interval.maxTime * 100)
+        lines.append(f"- {start_cs} {end_cs} {word}")
+
+    # Écriture du fichier Ultrastar
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    print(f"Fichier Ultrastar créé : {output_path}")
 
     cursor.execute(
-        "UPDATE song_list SET Export_Ultrastar = ? WHERE id = ?",
-        ("N", id)
+        "UPDATE song_list SET Export_Ultrastar='Y' WHERE id=?",
+        (id,)
     )
     conn.commit()
 
-    print("     🪩 Fichiers Ultrastar exportés")
-
-
-if __name__ == "__main__":
-    main()
+    print("🪩 Export UltraStar terminé (version officielle-like)")

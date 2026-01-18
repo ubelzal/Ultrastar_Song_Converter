@@ -55,7 +55,9 @@ def main(id, WAV: str, MFA: str, LANGUAGE: str, cursor: object, conn: object):
         "--beam", "100",
         "--retry_beam", "400",
         "--output_format", "long_textgrid",
-        "--include_original_text" # ligne par ligne
+        "--include_original_text", # ligne par ligne
+        "--single_speaker",         # important pour un seul chanteur
+        "--conservative_alignment"  # pour éviter timings trop courts
     ],
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,

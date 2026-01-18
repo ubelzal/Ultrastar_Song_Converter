@@ -74,7 +74,7 @@ def main():
             print(id, "-", ARTIST, ":",TITLE)
 
             # MFA_CONVERT
-            if MFA is None and WAV and LANGUAGE:
+            if MFA: # is None and WAV and LANGUAGE:
                 MFA_CONVERT.main (id,WAV,MFA,LANGUAGE,cursor,conn)
                 time.sleep(0.15)
 

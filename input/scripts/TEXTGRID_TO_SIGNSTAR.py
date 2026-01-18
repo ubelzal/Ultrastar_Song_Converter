@@ -1,313 +1,273 @@
-#!/usr/bin/env python3
-"""
-Convertisseur TextGrid vers SignStar/UltraStar
-Convertit des fichiers de transcription TextGrid en fichiers .txt au format SignStar
-"""
-
 import re
-import sys
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
 
-class Word:
-    """Représente un mot avec ses timings"""
-    def __init__(self, xmin: float, xmax: float, text: str):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.text = text
-        self.duration = xmax - xmin
-
-class Phoneme:
-    """Représente un phonème avec ses timings"""
-    def __init__(self, xmin: float, xmax: float, text: str):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.text = text
-
-class TextGridParser:
-    """Parse un fichier TextGrid et extrait les mots et phonèmes"""
-    
-    @staticmethod
-    def parse_tier(content: str, tier_name: str) -> List:
-        """Parse un tier spécifique et retourne une liste d'intervalles"""
-        items = []
-        lines = content.split('\n')
-        
-        in_tier = False
-        current_item = {}
-        
-        for i, line in enumerate(lines):
-            line = line.strip()
-            
-            # Détecter le tier recherché
-            if f'name = "{tier_name}"' in line:
-                in_tier = True
-                continue
-            
-            # Sortir du tier si on arrive à un nouveau tier
-            if in_tier and 'class = "IntervalTier"' in line and i > 0:
-                in_tier = False
-            
-            if not in_tier:
-                continue
-            
-            # Extraire xmin
-            if 'xmin =' in line:
-                match = re.search(r'xmin\s*=\s*([\d.]+)', line)
-                if match:
-                    current_item['xmin'] = float(match.group(1))
-            
-            # Extraire xmax
-            elif 'xmax =' in line:
-                match = re.search(r'xmax\s*=\s*([\d.]+)', line)
-                if match:
-                    current_item['xmax'] = float(match.group(1))
-            
-            # Extraire text
-            elif 'text =' in line:
-                match = re.search(r'text\s*=\s*"([^"]*)"', line)
-                if match:
-                    text = match.group(1).strip()
-                    if text and 'xmin' in current_item and 'xmax' in current_item:
-                        if tier_name == 'words':
-                            items.append(Word(
-                                current_item['xmin'],
-                                current_item['xmax'],
-                                text
-                            ))
-                        else:  # phones
-                            items.append(Phoneme(
-                                current_item['xmin'],
-                                current_item['xmax'],
-                                text
-                            ))
-                    current_item = {}
-        
-        return items
-    
-    @staticmethod
-    def parse(content: str) -> Tuple[List[Word], List[Phoneme]]:
-        """Parse le contenu TextGrid et retourne les mots et phonèmes"""
-        words = TextGridParser.parse_tier(content, 'words')
-        phonemes = TextGridParser.parse_tier(content, 'phones')
-        return words, phonemes
-
-class SignStarConverter:
-    """Convertit les mots en format SignStar"""
-    
-    def __init__(self, bpm: float = 300, gap: float = 5000, time_offset: float = 0):
+class TextGridToUltrastar:
+    def __init__(self, bpm, gap_ms):
         self.bpm = bpm
-        self.gap = gap
-        self.time_offset = time_offset  # Offset en secondes à ajouter au timing TextGrid
-        self.beat_duration = 60000 / bpm  # durée d'un beat en ms
-    
-    def time_to_beat(self, time_seconds: float) -> int:
-        """Convertit un temps en secondes en beat"""
-        # Ajouter l'offset au temps TextGrid
-        adjusted_time = time_seconds + self.time_offset
-        time_ms = adjusted_time * 1000
-        # Ajouter le GAP puis convertir en beats
-        beat = (time_ms + self.gap) / self.beat_duration
-        return round(beat)
-    
-    def duration_to_beats(self, duration_seconds: float) -> int:
-        """Convertit une durée en secondes en nombre de beats"""
-        duration_ms = duration_seconds * 1000
-        beats = round(duration_ms / self.beat_duration)
-        return max(1, beats)  # minimum 1 beat
-    
-    def estimate_pitch_from_phonemes(self, word: Word, phonemes: List[Phoneme], 
-                                     index: int, total_words: int) -> List[Tuple[Phoneme, int]]:
+        self.gap_ms = gap_ms
+        
+    def time_to_beat(self, time_seconds):
+        """Convertit un temps en secondes en beats UltraStar
+        
+        Formule UltraStar: beat = ((time_ms - GAP) * BPM) / 15000
         """
-        Estime la hauteur pour chaque phonème du mot
-        Retourne une liste de (phoneme, pitch)
-        """
-        # Trouver les phonèmes qui correspondent à ce mot
-        word_phonemes = [p for p in phonemes 
-                        if p.xmin >= word.xmin and p.xmax <= word.xmax + 0.01]
+        time_ms = time_seconds * 1000.0
+        adjusted_ms = time_ms - self.gap_ms
+        beats = (adjusted_ms * self.bpm) / 15000.0
+        return int(round(beats))
+    
+    def parse_textgrid(self, filepath):
+        """Parse un fichier TextGrid et extrait les tiers words et phones"""
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
         
-        if not word_phonemes:
-            # Pas de phonèmes, utiliser une estimation simple
-            pitch = self.estimate_pitch_simple(index, total_words, word)
-            return [(None, pitch)]
+        # Extraire la tier "words"
+        words_section = re.search(r'name = "words".*?intervals: size = (\d+)(.*?)(?=item \[|$)', 
+                                  content, re.DOTALL)
         
-        # Estimer le pitch de base pour ce mot
-        base_pitch = self.estimate_pitch_simple(index, total_words, word)
+        # Extraire la tier "phones"
+        phones_section = re.search(r'name = "phones".*?intervals: size = (\d+)(.*?)(?=item \[|$)', 
+                                   content, re.DOTALL)
         
-        # Varier légèrement selon le phonème
-        result = []
-        for i, phoneme in enumerate(word_phonemes):
-            # Voyelles = pitch plus haut, consonnes = pitch plus bas
-            vowels = ['a', 'e', 'i', 'o', 'u', 'y']
+        if not words_section:
+            raise ValueError("Tier 'words' non trouvée dans le fichier TextGrid")
+        if not phones_section:
+            raise ValueError("Tier 'phones' non trouvée dans le fichier TextGrid")
+        
+        # Parser les intervalles
+        interval_pattern = r'intervals \[\d+\]:\s*xmin = ([\d.]+)\s*xmax = ([\d.]+)\s*text = "(.*?)"'
+        
+        words_intervals = re.findall(interval_pattern, words_section.group(2), re.DOTALL)
+        phones_intervals = re.findall(interval_pattern, phones_section.group(2), re.DOTALL)
+        
+        # Créer les listes de mots et phones
+        words = []
+        for xmin, xmax, text in words_intervals:
+            text = text.strip()
+            if text:
+                words.append({
+                    'xmin': float(xmin),
+                    'xmax': float(xmax),
+                    'text': text
+                })
+        
+        phones = []
+        for xmin, xmax, text in phones_intervals:
+            text = text.strip()
+            if text:
+                phones.append({
+                    'xmin': float(xmin),
+                    'xmax': float(xmax),
+                    'text': text
+                })
+        
+        return words, phones
+    
+    def group_phones_by_words(self, words, phones):
+        """Groupe les phones par mots en fonction de leur timing"""
+        word_phone_groups = []
+        
+        for word in words:
+            word_phones = []
+            word_text_parts = []
             
-            if any(v in phoneme.text.lower() for v in vowels):
-                pitch = base_pitch + (i % 3)  # Varier légèrement
-            else:
-                pitch = base_pitch - 1
+            # Trouver tous les phones qui appartiennent à ce mot
+            for phone in phones:
+                # Un phone appartient à un mot si il est dans sa plage temporelle
+                # (avec une petite tolérance)
+                if (phone['xmin'] >= word['xmin'] - 0.01 and 
+                    phone['xmax'] <= word['xmax'] + 0.01):
+                    word_phones.append(phone)
             
-            result.append((phoneme, max(-1, min(14, pitch))))
+            if word_phones:
+                # Regrouper les phones en syllabes basiques
+                # Pour simplifier, on groupe par petits clusters de phones
+                syllables = self.group_phones_into_syllables(word_phones, word['text'])
+                word_phone_groups.append({
+                    'word': word['text'],
+                    'syllables': syllables,
+                    'xmin': word['xmin'],
+                    'xmax': word['xmax']
+                })
         
-        return result
+        return word_phone_groups
     
-    def estimate_pitch_simple(self, index: int, total_words: int, word: Word) -> int:
-        """Estimation simple de la hauteur de note"""
-        cycle = index // 10
-        position = index % 10
-        
-        if position < 3:
-            base_pitch = 1 + (cycle % 3)
-        elif position < 6:
-            base_pitch = 4 + (cycle % 5)
-        elif position < 8:
-            base_pitch = 8 + (cycle % 3)
-        else:
-            base_pitch = 6 + (cycle % 4)
-        
-        # Ajustement selon la durée
-        if word.duration > 0.5:
-            base_pitch += 2
-        elif word.duration < 0.15:
-            base_pitch -= 1
-        
-        return max(-1, min(14, base_pitch))
-    
-    def should_add_phrase_break(self, index: int, word: Word, next_word: Word = None) -> bool:
-        """Détermine si on doit ajouter une fin de phrase"""
-        # Fin de phrase tous les 4-6 mots
-        if (index + 1) % 5 == 0:
-            return True
-        
-        # Si pause longue entre deux mots (> 0.5s)
-        if next_word and (next_word.xmin - word.xmax) > 0.5:
-            return True
-        
-        return False
-    
-    def split_word_by_phonemes(self, word: Word, phonemes: List[Phoneme]) -> List[Tuple[str, float, float]]:
-        """
-        Divise un mot en syllabes/parties basé sur les phonèmes
-        Retourne une liste de (texte, xmin, xmax)
-        """
-        # Trouver les phonèmes du mot
-        word_phonemes = [p for p in phonemes 
-                        if p.xmin >= word.xmin - 0.01 and p.xmax <= word.xmax + 0.01]
-        
-        if not word_phonemes:
-            return [(word.text, word.xmin, word.xmax)]
-        
-        # Grouper les phonèmes en syllabes (approximatif)
+    def group_phones_into_syllables(self, phones, word_text):
+        """Regroupe les phones en syllabes"""
         syllables = []
-        current_syllable = []
-        current_text = []
         
-        vowels = ['a', 'e', 'i', 'o', 'u', 'y', 'É›', 'É"', 'É'', 'Ã¸', 'Å"', 'É'Ìƒ', 'É›Ìƒ', 'É"Ìƒ', 'É™']
-        
-        for phoneme in word_phonemes:
-            current_syllable.append(phoneme)
-            current_text.append(phoneme.text)
+        # Stratégie simple : regrouper 2-4 phones ensemble
+        # ou utiliser les pauses naturelles entre phones
+        i = 0
+        while i < len(phones):
+            syllable_phones = []
+            syllable_start = phones[i]['xmin']
+            syllable_end = phones[i]['xmax']
             
-            # Si c'est une voyelle et qu'on a des consonnes après, créer une syllabe
-            is_vowel = any(v in phoneme.text.lower() for v in vowels)
+            # Prendre 2-3 phones pour former une syllabe
+            # (ajuster selon la complexité souhaitée)
+            phones_in_syllable = min(3, len(phones) - i)
             
-            if is_vowel and len(current_syllable) > 0:
-                # Vérifier si le prochain phonème est une consonne
-                next_idx = word_phonemes.index(phoneme) + 1
-                if next_idx < len(word_phonemes):
-                    next_phoneme = word_phonemes[next_idx]
-                    next_is_vowel = any(v in next_phoneme.text.lower() for v in vowels)
-                    
-                    if not next_is_vowel:
-                        # On peut clore la syllabe
-                        xmin = current_syllable[0].xmin
-                        xmax = current_syllable[-1].xmax
-                        syllables.append((''.join(current_text), xmin, xmax))
-                        current_syllable = []
-                        current_text = []
+            for j in range(phones_in_syllable):
+                if i + j < len(phones):
+                    syllable_phones.append(phones[i + j])
+                    syllable_end = phones[i + j]['xmax']
+            
+            # Extraire une approximation du texte pour cette syllabe
+            syllable_text = self.extract_syllable_text(
+                word_text, i, phones_in_syllable, len(phones)
+            )
+            
+            syllables.append({
+                'xmin': syllable_start,
+                'xmax': syllable_end,
+                'text': syllable_text,
+                'phones': syllable_phones
+            })
+            
+            i += phones_in_syllable
         
-        # Ajouter la dernière syllabe
-        if current_syllable:
-            xmin = current_syllable[0].xmin
-            xmax = current_syllable[-1].xmax
-            syllables.append((''.join(current_text), xmin, xmax))
-        
-        # Si pas de syllabes générées, retourner le mot entier
-        if not syllables:
-            return [(word.text, word.xmin, word.xmax)]
-        
-        # Mapper approximativement les syllabes phonétiques au texte du mot
-        # (simplifié - on garde juste le découpage temporel)
         return syllables
     
-    def convert(self, words: List[Word], phonemes: List[Phoneme], 
-                metadata: Dict[str, str], use_phonemes: bool = True) -> str:
-        """Convertit la liste de mots en format SignStar"""
-        output = []
+    def extract_syllable_text(self, word_text, syllable_index, phones_count, total_phones):
+        """Extrait approximativement le texte d'une syllabe à partir du mot"""
+        # Stratégie simple : diviser le mot proportionnellement
+        word_len = len(word_text)
         
-        # En-tête avec métadonnées
-        output.append(f"#TITLE:{metadata.get('title', 'Sans titre')}")
-        output.append(f"#ARTIST:{metadata.get('artist', 'Artiste inconnu')}")
+        if total_phones <= 1:
+            return word_text
         
-        if 'edition' in metadata:
-            output.append(f"#EDITION:{metadata['edition']}")
-        if 'genre' in metadata:
-            output.append(f"#GENRE:{metadata['genre']}")
-        if 'language' in metadata:
-            output.append(f"#LANGUAGE:{metadata['language']}")
-        if 'year' in metadata:
-            output.append(f"#YEAR:{metadata['year']}")
+        # Calculer la position approximative dans le mot
+        chars_per_phone = word_len / total_phones
+        start_pos = int(syllable_index * chars_per_phone)
+        end_pos = int((syllable_index + phones_count) * chars_per_phone)
         
-        if 'background' in metadata:
-            output.append(f"#BACKGROUND:{metadata['background']}")
+        # S'assurer qu'on ne dépasse pas
+        start_pos = min(start_pos, word_len)
+        end_pos = min(end_pos, word_len)
+        
+        if end_pos <= start_pos:
+            end_pos = start_pos + 1
+        
+        syllable = word_text[start_pos:end_pos]
+        
+        # Si c'est vide, prendre au moins un caractère
+        if not syllable and word_text:
+            syllable = word_text[0] if syllable_index == 0 else word_text[-1]
+        
+        return syllable if syllable else word_text
+    
+    def estimate_pitch(self, syllable_index, total_syllables):
+        """Estime une hauteur de note (pitch) basique
+        Pitch 0 = C4 (Midi Note 60)
+        """
+        # Pattern mélodique plus varié
+        base_pitches = [0, 2, 4, 5, 7, 9, 11, 12, 11, 9, 7, 5, 4, 2, 0, -2]
+        return base_pitches[syllable_index % len(base_pitches)]
+    
+    def convert(self, textgrid_path, output_path, metadata=None):
+        """Convertit un fichier TextGrid en format UltraStar"""
+        words, phones = self.parse_textgrid(textgrid_path)
+        word_phone_groups = self.group_phones_by_words(words, phones)
+        
+        # Métadonnées par défaut
+        if metadata is None:
+            metadata = {}
+        
+        title = metadata.get('title', 'Sans titre')
+        artist = metadata.get('artist', 'Artiste inconnu')
+        genre = metadata.get('genre', 'Generique')
+        
+        # Générer le fichier UltraStar
+        output_lines = []
+        output_lines.append(f"#TITLE:{title}")
+        output_lines.append(f"#ARTIST:{artist}")
+        output_lines.append(f"#GENRE:{genre}")
+        output_lines.append(f"#BPM:{self.bpm}")
+        output_lines.append(f"#GAP:{self.gap_ms}")
+        
+        if 'mp3' in metadata:
+            output_lines.append(f"#MP3:{metadata['mp3']}")
         if 'cover' in metadata:
-            output.append(f"#COVER:{metadata['cover']}")
+            output_lines.append(f"#COVER:{metadata['cover']}")
         
-        output.append(f"#MP3:{metadata.get('mp3', 'audio.mp3')}")
-        output.append(f"#BPM:{self.bpm}")
-        output.append(f"#GAP:{int(self.gap)}")
+        output_lines.append("")
         
-        # Conversion des notes
-        for i, word in enumerate(words):
-            # Diviser le mot en parties basées sur les phonèmes si disponibles
-            if use_phonemes and phonemes:
-                parts = self.split_word_by_phonemes(word, phonemes)
-            else:
-                parts = [(word.text, word.xmin, word.xmax)]
+        # Convertir chaque syllabe en note UltraStar
+        syllable_counter = 0
+        prev_end_beat = 0
+        
+        for word_group in word_phone_groups:
+            for syllable in word_group['syllables']:
+                start_beat = self.time_to_beat(syllable['xmin'])
+                end_beat = self.time_to_beat(syllable['xmax'])
+                duration = end_beat - start_beat
+                
+                if duration <= 0:
+                    duration = 1
+                
+                pitch = self.estimate_pitch(syllable_counter, 
+                                           sum(len(wg['syllables']) for wg in word_phone_groups))
+                
+                # Format UltraStar: NoteType StartBeat Length Pitch Text 
+                # Important: ajouter un espace après le texte
+                output_lines.append(f": {start_beat} {duration} {pitch} {syllable['text']} ")
+                
+                prev_end_beat = end_beat
+                syllable_counter += 1
             
-            # Créer une note pour chaque partie
-            for part_text, part_xmin, part_xmax in parts:
-                start_beat = self.time_to_beat(part_xmin)
-                duration = part_xmax - part_xmin
-                length = self.duration_to_beats(duration)
+            # Ajouter une fin de phrase après chaque mot si gap significatif
+            if word_group != word_phone_groups[-1]:  # Pas le dernier mot
+                next_word = word_phone_groups[word_phone_groups.index(word_group) + 1]
+                next_start = self.time_to_beat(next_word['xmin'])
+                gap_beats = next_start - prev_end_beat
                 
-                # Estimer le pitch
-                pitch = self.estimate_pitch_simple(i, len(words), word)
-                
-                # Type de note
-                note_type = ':'
-                if i % 15 == 7:  # Note dorée occasionnelle
-                    note_type = '*'
-                
-                output.append(f"{note_type} {start_beat} {length} {pitch} {part_text}")
-            
-            # Fin de phrase
-            next_word = words[i + 1] if i < len(words) - 1 else None
-            if next_word and self.should_add_phrase_break(i, word, next_word):
-                phrase_end_beat = self.time_to_beat(word.xmax)
-                output.append(f"- {phrase_end_beat}")
+                # Si gap > 0.3 seconde (environ 6+ beats à 300 BPM)
+                if gap_beats > 6:
+                    output_lines.append(f"- {prev_end_beat}")
         
-        # Fin de fichier
-        output.append("E")
+        output_lines.append("E")
         
-        return '\n'.join(output)
+        # Écrire le fichier
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(output_lines))
+        
+        print(f"Conversion terminée : {output_path}")
+        print(f"- {len(word_phone_groups)} mots traités")
+        print(f"- {syllable_counter} syllabes générées")
+        return output_path
 
-def calculate_time_offset(textgrid_path: Path, reference_signstar_path: Path, 
-                          bpm: float, gap: float) -> float:
-    """
-    Calcule l'offset temporel en comparant un fichier TextGrid avec un SignStar de référence
-    """
-    print("\n🔍 Calcul de l'offset temporel...")
+
+# Exemple d'utilisation
+if __name__ == "__main__":
+   
+    # Configuration
+    BPM = 300
+    GAP_MS = 5000
     
-    # Lire le TextGrid
-    with open(textgrid_path, 'r', encoding='utf-8') as f:
-        textgrid_content = f.read()
+    # Créer le convertisseur
+    converter = TextGridToUltrastar(bpm=BPM, gap_ms=GAP_MS)
     
+    # Métadonnées de la chanson
+    metadata = {
+        'title': 'Au pays de Candy',
+        'artist': 'Dominique Poulain',
+        'genre': 'Generique',
+        'mp3': 'Dominique_Poulain - Au_pays_de_Candy.mp3',
+        'cover': 'Dominique_Poulain - Au_pays_de_Candy [CO].jpg',
+        'GAP': GAP_MS,
+        'BPM': BPM
+    }
+    
+    # Chemins des fichiers
+    input_file = "/app/output/Dominique_Poulain/Au_pays_de_Candy/Dominique_Poulain - Au_pays_de_Candy.TextGrid"
+    output_file = "/app/output/Dominique_Poulain/Au_pays_de_Candy/Dominique_Poulain - Au_pays_de_Candy.txt"
+    
+    # Effectuer la conversion
+    try:
+        converter.convert(input_file, output_file, metadata)
+        print("✓ Fichier converti avec succès!")
+    except FileNotFoundError:
+        print(f"Erreur: Fichier '{input_file}' non trouvé")
+    except Exception as e:
+        print(f"Erreur lors de la conversion: {e}")
