@@ -166,9 +166,9 @@ def main():
                 print("     ∅  GAP déjà importé")
 
 
-            # 🪩 EXPORT ULTRASTAR
+            # 🎶 EXPORT ULTRASTAR
             if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
-                EXPORT_ULTRASTAR_FILES.textgrid_to_ultrastar(id, YEAR, MP3, COVER, ARTIST, TITLE, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA,  cursor, conn)
+                EXPORT_ULTRASTAR_FILES.main(id, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA, GENRE, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
 
