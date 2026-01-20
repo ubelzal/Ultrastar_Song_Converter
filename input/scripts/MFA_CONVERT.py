@@ -7,6 +7,7 @@ def get_mfa_models(language: str):
     language = language.lower()
 
     if language == "french":
+        # dictionnaire et modèle acoustique = modèle intégré
         return "french_mfa", "french_mfa"
     elif language == "english":
         return "english_us_arpa", "english_us_arpa"

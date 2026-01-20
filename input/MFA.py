@@ -62,7 +62,7 @@ def main():
     conn = sqlite3.connect(DATABASE_LOCATION)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA, Speaker FROM song_list WHERE id >= 170 ORDER BY id")
+    cursor.execute("SELECT id,VERSION,YoutubeID,SpotifyID,ARTIST,TITLE,ALBUM,LYRICS,BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,LANGUAGE,YEAR,MP3,'Update',Re_Import, WAV, MFA, Speaker FROM song_list WHERE id >= 1 ORDER BY id")
     rows = cursor.fetchall()
 	
     for row in rows:

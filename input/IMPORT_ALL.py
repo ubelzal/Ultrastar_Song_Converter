@@ -81,7 +81,7 @@ def main():
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
                LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar,GAP,Speaker   
         FROM song_list
-        WHERE id >= 1 
+        WHERE id = 42 
         ORDER BY id
     """)
     
@@ -112,7 +112,7 @@ def main():
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
                 print("     🎵 MP3 déjà importé")
-
+            print(Export_Ultrastar)
 
             # 💓 BPM
             if MP3 and BPM is None:
@@ -165,13 +165,13 @@ def main():
             # else:
             #     print("     ∅  GAP déjà importé")
 
-
             # 🎶 EXPORT ULTRASTAR
             if Export_Ultrastar == "Y" and MP3 and COVER and ARTIST and TITLE and BPM and VOCALS and INSTRUMENTAL:
                 EXPORT_ULTRASTAR_FILES.main(id, ARTIST, TITLE, YEAR, MP3, COVER, BPM, VOCALS, INSTRUMENTAL, GAP, LANGUAGE, MFA, GENRE, cursor, conn)
                 conn.commit()
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
-
+   
+            #time.sleep(1)
 
         except Exception as e:
             print(f"     ❌ Erreur d'importation sur {VERSION} (id={id}): {e}\n→!")

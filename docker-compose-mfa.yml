@@ -2,6 +2,7 @@ services:
   # Service pour initialiser les modèles
   mfa-init:
     image: mmcauliffe/montreal-forced-aligner:latest
+    user: "1000:1000"
     volumes:
       - mfa-models:/mfa
     command: >
@@ -17,6 +18,7 @@ services:
   # Service principal MFA
   mfa:
     image: mmcauliffe/montreal-forced-aligner:latest
+    user: "1000:1000"
     container_name: mfa-aligner
     volumes:
       - ./input:/data/input

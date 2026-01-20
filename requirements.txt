@@ -2,9 +2,9 @@ demucs
 torch
 torchaudio
 requests
+torchcodec
 pydub
 yt-dlp
 essentia
 
 # montreal-forced-aligner
-# torchcodec
