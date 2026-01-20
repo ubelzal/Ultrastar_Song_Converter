@@ -5,6 +5,7 @@ from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
 from scripts import EXPORT_ULTRASTAR_FILES
 from scripts import IMPORT_GAP
+from scripts import IMPORT_TAGS
 import os
 import sqlite3
 import subprocess
@@ -81,7 +82,7 @@ def main():
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
                LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar,GAP,Speaker   
         FROM song_list
-        WHERE id = 42 
+        WHERE id >= 1  
         ORDER BY id
     """)
     
@@ -112,7 +113,7 @@ def main():
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
                 print("     🎵 MP3 déjà importé")
-            print(Export_Ultrastar)
+
 
             # 💓 BPM
             if MP3 and BPM is None:
@@ -155,6 +156,15 @@ def main():
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
                 print("     🎨 COVER déjà importé")
+
+
+            # # 🏷️ TAGS
+            # if TAGS is None or TAGS == "[]":
+            #     IMPORT_TAGS.main(id, ARTIST, TITLE, TAGS, cursor, conn)
+            #     conn.commit()
+            #     MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            # else:
+            #     print("     🏷️ Tags déjà importé")
 
 
             # # 🪩 IMPORT GAP

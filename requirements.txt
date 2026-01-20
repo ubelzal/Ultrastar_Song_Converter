@@ -7,4 +7,5 @@ pydub
 yt-dlp
 essentia
 
+# pylast
 # montreal-forced-aligner
