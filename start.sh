@@ -16,5 +16,8 @@ docker compose -p karaoke run --rm karaoke python IMPORT_ALL.py
 docker compose -p mfa -f docker-compose-mfa.yml run --rm mfa python MFA.py
 
 # COPY All FILES TO ULTRASTAR
-cp -rf /home/belala/git/Ultrastar_Song_Converter/UltraStar/. \
+sudo cp -rf /home/belala/git/Ultrastar_Song_Converter/UltraStar/. \
        /home/belala/.var/app/eu.usdx.UltraStarDeluxe/.ultrastardx/songs/
+
+# Effacer
+sudo rm -rf /home/belala/git/Ultrastar_Song_Converter/UltraStar/.
