@@ -4,8 +4,9 @@ from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
 from scripts import EXPORT_ULTRASTAR_FILES
-from scripts import IMPORT_GAP
-from scripts import IMPORT_TAGS
+#from scripts import IMPORT_GAP
+#from scripts import IMPORT_TAGS
+from scripts import IMPORT_SHAZAM
 import os
 import sqlite3
 import subprocess
@@ -113,6 +114,15 @@ def main():
                 MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
             else:
                 print("     🎵 MP3 déjà importé")
+
+
+            # # 𓂀 SHAZAM
+            # if MP3:
+            #     IMPORT_SHAZAM.main(id, MP3, ARTIST, TITLE, cursor, conn)
+            #     conn.commit()
+            #     MP3, BPM, VOCALS, INSTRUMENTAL, WAV, MFA = refresh_song(id, cursor)
+            # else:
+            #     print("     𓂀 Shazam déjà effectué")
 
 
             # 💓 BPM
