@@ -4,9 +4,9 @@ from scripts import IMPORT_LYRICS
 from scripts import CONVERT_WAV
 from scripts import IMPORT_COVER
 from scripts import EXPORT_ULTRASTAR_FILES
-#from scripts import IMPORT_GAP
-#from scripts import IMPORT_TAGS
-from scripts import IMPORT_SHAZAM
+# from scripts import IMPORT_GAP
+# from scripts import IMPORT_TAGS
+# from scripts import IMPORT_SHAZAM
 import os
 import sqlite3
 import subprocess
