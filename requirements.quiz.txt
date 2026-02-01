@@ -2,5 +2,5 @@
 fastapi
 uvicorn[standard]
 python-dotenv
-sqlite3
+# sqlite3
 # Add any other dependencies your app needs

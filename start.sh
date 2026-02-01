@@ -21,3 +21,9 @@ sudo cp -rf /home/belala/git/Ultrastar_Song_Converter/UltraStar/. \
 
 # Effacer
 sudo rm -rf /home/belala/git/Ultrastar_Song_Converter/UltraStar/.
+
+
+# Jeux
+ docker build -f Dockerfile.quiz -t quiz .
+ # docker run -it --rm quiz
+ docker run -it --rm -p 8000:8000 quiz^C
