@@ -1,0 +1,6 @@
+# requirements.txt for Karaoke Quiz Game
+fastapi
+uvicorn[standard]
+python-dotenv
+sqlite3
+# Add any other dependencies your app needs

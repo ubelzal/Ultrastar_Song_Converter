@@ -1,0 +1,32 @@
+# Dockerfile for Karaoke Quiz Game
+# Base image
+FROM python:3.11-slim
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.quiz.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.quiz.txt
+
+# Copy application code
+COPY main.py ./
+COPY .env.quiz ./
+COPY start.quiz.sh ./
+COPY input/database ./input/database
+
+# Expose port for FastAPI/uvicorn
+EXPOSE 8000
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Start the FastAPI server
+ENTRYPOINT ["/bin/bash", "start.quiz.sh"]
