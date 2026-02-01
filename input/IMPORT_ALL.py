@@ -83,7 +83,7 @@ def main():
                BPM,COVER,BACKGROUND,VOCALS,INSTRUMENTAL,GENRE,TAGS,
                LANGUAGE,YEAR,MP3,'Update',Re_Import,WAV,MFA,Export_Ultrastar,GAP,Speaker   
         FROM song_list
-        WHERE id >= 1  
+        WHERE id >= 1 
         ORDER BY id
     """)
     
