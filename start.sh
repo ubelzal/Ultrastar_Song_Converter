@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo chmod -R 777 /home/belala/git/Ultrastar_Song_Converter/output
+
 # Supprimer les paquets installés automatiquement mais plus utilisés
 sudo apt autoremove -y && sudo apt autoclean -y
 
