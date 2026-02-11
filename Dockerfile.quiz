@@ -27,10 +27,9 @@ COPY main.py ./
 COPY .env.quiz ./
 COPY start.quiz.sh ./
 COPY input/database ./input/database
+COPY frontend ./frontend/
 
 EXPOSE 8000
 
 ENV PYTHONUNBUFFERED=1
-ENV DB_PATH=/app/input/database/database.db
-
 CMD ["bash", "/app/start.quiz.sh"]
